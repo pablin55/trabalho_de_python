@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Cadastro - Quiz de Futebol{% endblock %}
+
+{% block content %}
+<article class="text-center">
+    <h2 class="start-title">QUIZ DE FUTEBOL</h2>
+    <p>Digite seu nome para começar a partida.</p>
+
+    <form method="POST" action="{{ url_for('cadastrar') }}" class="mt-4">
+        <input
+            type="text"
+            name="nome"
+            class="form-control form-control-lg mx-auto mb-3"
+            style="max-width: 400px; background:#1f1f21; color:#fff; border:1px solid #333;"
+            placeholder="Seu nome"
+            required
+            autofocus
+        >
+        <button type="submit" class="btn btn-neon">COMEÇAR</button>
+    </form>
+</article>
+{% endblock %}
