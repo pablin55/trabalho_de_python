@@ -306,28 +306,5 @@ perguntas = [
 ]
 import random
 
-perguntassorteadas= random.sample(perguntas, 10)
-
-pontuacao = 0
-for index, pergunta in enumerate(perguntassorteadas):
-    
-    print(f"--Pergunta {index + 1 } de {len(perguntassorteadas)}--")
-    print(f"\n{pergunta["pergunta"]}\n")
-
-    for opcao in pergunta ["opcoes"]:
-        print (opcao)
-
-    correta = input("\nDigite a letra da resposta correta: ").strip().upper()
-    
-    if correta == pergunta ["correta"]:
-        print("\nCORRETO\n")
-        pontuacao += 1
-    
-    else: 
-        print(f"\nINCORRETO! A ALTERNATIVA CORRETA ERA {pergunta["correta"]}\n")
-
-   
-print(f"\nVocê acertou {pontuacao} de {len(perguntassorteadas)} perguntas!")
-  
-    
-
+def obter_perguntas(quantidade=10):
+    return random.sample(perguntas, quantidade)
