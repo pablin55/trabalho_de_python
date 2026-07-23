@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado{% endblock %}
+
+{% block content %}
+
+<article class="text-center">
+
+    <h1>🏆 Quiz Finalizado!</h1>
+
+    <h3 class="mt-4">
+        Parabéns, {{ jogador.nome }}!
+    </h3>
+
+    <p>
+    Você acertou <strong>{{ jogador.acertos }}</strong>
+    {% if jogador.acertos == 1 %}
+        pergunta.
+    {% else %}
+        perguntas.
+    {% endif %}
+</p>
+
+    <p>
+        Sua pontuação foi de <strong>{{ jogador.pontuacao }}</strong> pontos.
+    </p>
+
+   <div class="mt-4">
+
+    <a href="{{ url_for('index') }}" class="btn btn-neon me-2">
+        🔄 Jogar Novamente
+    </a>
+
+    <a href="{{ url_for('ranking') }}" class="btn btn-secondary">
+        🏆 Ver Ranking
+    </a>
+
+</div>
+
+</article>
+
+{% endblock %}

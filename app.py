@@ -1,33 +1,20 @@
-#Arquivo principal do projeto. Controla as rotas do Flask
-#  recebe as requisições do usuário e executa a lógica do quiz.
-
-'''Flask é um microframework em Python utilizado para criar aplicações web,
- gerenciando rotas, requisições e a renderização de páginas HTML.'''
-
-
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from models import Jogador, Pergunta
+from models import Jogador
+from perguntas_respostas import obter_perguntas
 
 app = Flask(__name__)
-app.secret_key = "chave-secreta-para-sessao"  # necessário para usar session
+app.secret_key = "chave-secreta-para-sessao"
 
-# ---------------------------------------------------------
-# "Banco de dados" em memória
-# ---------------------------------------------------------
-# Dicionário de jogadores cadastrados: {id: Jogador}
+# -----------------------------
+# Banco em memória
+# -----------------------------
 jogadores = {}
-
-# Contador simples para gerar IDs únicos
 proximo_id = 1
-
-# Lista que vai guardar o histórico de partidas finalizadas (para o ranking)
-# Cada item: {"nome": str, "pontuacao": int, "acertos": int}
 ranking_historico = []
 
 
 @app.route("/")
 def index():
-    # Sempre que abrir a página inicial, começamos um cadastro novo
     return render_template("cadastro.html")
 
 
@@ -37,28 +24,110 @@ def cadastrar():
 
     nome = request.form.get("nome", "").strip()
 
-    # Validação: nome vazio
     if not nome:
-        flash("Digite um nome válido para começar.")
+        flash("Digite um nome válido.")
         return redirect(url_for("index"))
 
-    # Validação: nome duplicado entre jogadores ainda "ativos" nesta sessão de partidas
     if any(j.nome.lower() == nome.lower() for j in jogadores.values()):
-        flash(f'Já existe um jogador chamado "{nome}" nesta partida. Escolha outro nome.')
+        flash("Já existe um jogador com esse nome.")
         return redirect(url_for("index"))
 
-    # Cria o jogador e guarda no "banco" em memória
     jogador = Jogador(id=proximo_id, nome=nome)
     jogadores[proximo_id] = jogador
 
-    # Guarda na sessão do navegador qual é o jogador atual e em que pergunta ele está
     session["jogador_id"] = proximo_id
+
+    # Sorteia as perguntas apenas uma vez
+    session["perguntas"] = obter_perguntas()
+
+    # Começa da primeira pergunta
     session["pergunta_atual"] = 0
 
     proximo_id += 1
 
-    return f"Jogador '{jogador.nome}' cadastrado com sucesso! (id={jogador.id}) — próximo passo: tela do quiz."
+    return redirect(url_for("quiz"))
 
+
+@app.route("/quiz")
+def quiz():
+
+    perguntas = session.get("perguntas", [])
+    indice = session.get("pergunta_atual", 0)
+
+    if indice >= len(perguntas):
+        return redirect(url_for("resultado"))
+
+    pergunta = perguntas[indice]
+
+    return render_template(
+        "quiz.html",
+        pergunta=pergunta,
+        numero=indice + 1,
+        total=len(perguntas)
+    )
+
+
+@app.route("/responder", methods=["POST"])
+def responder():
+
+    # Resposta escolhida pelo jogador (A, B, C ou D)
+    resposta = request.form.get("resposta")
+
+    # Recupera as perguntas e a pergunta atual
+    perguntas = session.get("perguntas", [])
+    indice = session.get("pergunta_atual", 0)
+
+    pergunta = perguntas[indice]
+
+    # Recupera o jogador
+    jogador = jogadores[session["jogador_id"]]
+
+    # Verifica se acertou
+    acertou = resposta == pergunta["correta"]
+
+    # Atualiza pontuação do jogador
+    jogador.registrar_resposta(acertou)
+
+    # Próxima pergunta
+    session["pergunta_atual"] += 1
+
+    # Acabou o quiz?
+    if session["pergunta_atual"] >= len(perguntas):
+
+        ranking_historico.append({
+            "nome": jogador.nome,
+            "pontuacao": jogador.pontuacao,
+            "acertos": jogador.acertos
+        })
+
+        return redirect(url_for("resultado"))
+
+    return redirect(url_for("quiz"))
+
+
+@app.route("/resultado")
+def resultado():
+
+    jogador = jogadores.get(session["jogador_id"])
+
+    return render_template(
+        "resultado.html",
+        jogador=jogador
+    )
+
+@app.route("/ranking")
+def ranking():
+
+    ranking = sorted(
+        ranking_historico,
+        key=lambda jogador: jogador["pontuacao"],
+        reverse=True
+    )
+
+    return render_template(
+        "ranking.html",
+        ranking=ranking
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

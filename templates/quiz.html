@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz de Futebol{% endblock %}
+
+{% block content %}
+
+<article class="game-box">
+
+    <div class="d-flex justify-content-between mb-3">
+        <span><strong>Pergunta {{ numero }} de {{ total }}</strong></span>
+    </div>
+
+    <h2 class="question mb-4">
+        {{ pergunta.pergunta }}
+    </h2>
+
+    <form method="POST" action="{{ url_for('responder') }}">
+
+        {% for opcao in pergunta.opcoes %}
+
+        <button
+            type="submit"
+            name="resposta"
+            value="{{ opcao[0] }}"
+            class="option-btn">
+
+            {{ opcao }}
+
+        </button>
+
+        {% endfor %}
+
+    </form>
+
+</article>
+
+{% endblock %}

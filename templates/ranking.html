@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Ranking{% endblock %}
+
+{% block content %}
+
+<article>
+
+    <h1 class="text-center mb-4">🏆 Ranking dos Jogadores</h1>
+
+    {% if ranking %}
+
+    <table class="table table-dark table-striped text-center">
+
+        <thead>
+            <tr>
+                <th>Posição</th>
+                <th>Jogador</th>
+                <th>Acertos</th>
+                <th>Pontos</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for jogador in ranking %}
+
+            <tr>
+
+                <td>
+                    {% if loop.index == 1 %}
+                        🥇
+                    {% elif loop.index == 2 %}
+                        🥈
+                    {% elif loop.index == 3 %}
+                        🥉
+                    {% else %}
+                        {{ loop.index }}
+                    {% endif %}
+                </td>
+
+                <td>{{ jogador.nome }}</td>
+                <td>{{ jogador.acertos }}</td>
+                <td>{{ jogador.pontuacao }}</td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <h3 class="text-center">
+            Ainda não há jogadores no ranking.
+        </h3>
+
+    {% endif %}
+
+    <div class="text-center mt-4">
+
+        <a href="{{ url_for('index') }}" class="btn btn-neon">
+            🔄 Jogar Novamente
+        </a>
+
+    </div>
+
+</article>
+
+{% endblock %}
